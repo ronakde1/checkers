@@ -6,7 +6,7 @@ import ArucoDetector
 def main():
     images = ArucoDetector.GetSquares()
     board = [[opencvrun2.classify(image) for image in row] for row in images]
-    move = solver.CheckersSolver(board).calculate_move()
+    start, end = solver.CheckersSolver(board).calculate_move()
 
 
 if __name__ == "__main__":

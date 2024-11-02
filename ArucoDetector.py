@@ -42,7 +42,7 @@ def FindBoard(projectBack=False):
             #cv2.destroyAllWindows()
             #cv2.imshow("Board", warped_frame)
             if projectBack:
-                warped_frame = DrawArrow(warped_frame, 0, 63)
+                warped_frame = DrawArrow(warped_frame, (0, 0), (7, 7))
                 # Recompute the inverse homography to map back to the original frame
                 h_inv, _ = cv2.findHomography(pts_dst, pts_src)
 
@@ -72,7 +72,7 @@ def FindBoard(projectBack=False):
                 warped_back_masked = cv2.bitwise_and(warped_back, warped_back, mask=mask)
                 im_out = cv2.add(frame_masked, warped_back_masked)
 
-                cv2.imshow('Projected Frame', im_out)
+                cv2.imshow('Frame', im_out)
             else:
                 return warped_frame
             
@@ -103,13 +103,16 @@ def DrawArrow(img, startSquare, endSquare):
     square_width = width // grid_size
     square_height = height // grid_size
 
-    xs = int(((startSquare % 8)+0.5) * square_width)
-    ys = int(((startSquare // 8)+0.5) * square_height)
+    startx, starty = startSquare
+    endx, endy = endSquare
 
-    xe = int(((endSquare % 8)+0.5) * square_width)
-    ye = int(((endSquare // 8)+0.5) * square_height)
+    xs = int((startx+0.5) * square_width)
+    ys = int((starty+0.5) * square_height)
 
-    arrowColour = (0, 0, 255)
+    xe = int((endx+0.5) * square_width)
+    ye = int((endy+0.5) * square_height)
+
+    arrowColour = (0, 255, 0)
     arrowWidth = 3
     imgWithArrow = cv2.arrowedLine(img, (xs,ys), (xe, ye), arrowColour, arrowWidth)
     return imgWithArrow
@@ -139,8 +142,15 @@ def GetSquares():
     # for row in squares:
     #     for square in row:
     #         cv2.imshow("Square", square)
+    #         ClassifySquare(square)
     #         cv2.waitKey(0)
     return squares
+
+def ClassifySquare(img):
+    rgbImg = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    average = np.average(rgbImg, axis = (0,1))
+    print(average)
+    
 
 if __name__ == "__main__":
     GetSquares()   

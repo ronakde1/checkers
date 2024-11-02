@@ -136,13 +136,14 @@ def GetSquares():
             square = board[top:bottom, left:right]
             squares[7-row].append(square)
         
-    for row in squares:
-        for square in row:
-            cv2.imshow("Square", square)
-            cv2.waitKey(0)
+    # for row in squares:
+    #     for square in row:
+    #         cv2.imshow("Square", square)
+    #         cv2.waitKey(0)
     return squares
 
-
+if __name__ == "__main__":
+    GetSquares()   
 # # board = None
 # # while board == None:
 # #     board = FindBoard()

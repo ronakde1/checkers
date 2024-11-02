@@ -28,15 +28,16 @@ def predict_image(image_path):
 
 # Main function to run the program
 def main():
-    # Input image path from the user
-    image_path = "red.png"
-    
-    # Get the predicted class
-    predicted_label_index = predict_image(image_path)
-    
-    if predicted_label_index is not None:
-        # Print the corresponding class name
-        print(f"The predicted label is: {class_names[predicted_label_index]}")
+    for i in [1,2,79,80,139,140]:
+        # Input image path from the user
+        image_path = f"{i}.png"
+        
+        # Get the predicted class
+        predicted_label_index = predict_image(image_path)
+        
+        if predicted_label_index is not None:
+            # Print the corresponding class name
+            print(f"The predicted label is: {class_names[predicted_label_index]} for {i}")
 
 # Run the main function
 if __name__ == "__main__":

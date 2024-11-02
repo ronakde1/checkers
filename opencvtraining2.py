@@ -10,7 +10,7 @@ from joblib import dump, load  # Import joblib for saving/loading models
 def load_images_and_labels(data_directory):
     images = []
     labels = []
-    label_map = {'red_checker': 0, 'blue_checker': 1, 'no_checker_white': 2, 'no_checker_black': 3}
+    label_map = {'Red': 0, 'Blue': 1, 'Empty White': 2, 'Empty Black': 3}
 
     for label_name, label in label_map.items():
         folder_path = os.path.join(data_directory, label_name)
@@ -24,7 +24,7 @@ def load_images_and_labels(data_directory):
     return np.array(images), np.array(labels)
 
 # Step 2: Preprocess and split the data
-data_directory = 'training'
+data_directory = 'Training Data'
 images, labels = load_images_and_labels(data_directory)
 images = images.astype('float32') / 255.0  # Normalize pixel values
 X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42)

@@ -9,14 +9,14 @@ class Piece:
     _is_ai: bool
 
     def __repr__(self):
-        return f"{"c" if self.is_ai else "p"}"
+        return f"{"c" if self._is_ai else "p"}"
 
     def __copy__(self):
-        copy_object = Piece(_is_king=self._is_king, _is_ai=self.is_ai)
+        copy_object = Piece(_is_king=self._is_king, _is_ai=self._is_ai)
         return copy_object
 
     def __deepcopy__(self, memodict={}):
-        copy_object = Piece(_is_king=self._is_king, _is_ai=self.is_ai)
+        copy_object = Piece(_is_king=self._is_king, _is_ai=self._is_ai)
         return copy_object
 
 
@@ -30,13 +30,11 @@ class Square:
     def is_not_king(self):
         return (self.piece is not None) and not self.piece._is_king
 
-
     def is_ai(self):
         return (self.piece is not None) and self.piece._is_ai
 
     def is_not_ai(self):
         return (self.piece is not None) and (not self.piece._is_ai)
-
 
     def is_actual_piece(self):
         return self.piece is not None

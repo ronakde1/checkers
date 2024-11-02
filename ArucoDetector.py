@@ -111,7 +111,7 @@ def ProjectBack(img_data, startSquare, endSquare):
             warped_back_masked = cv2.bitwise_and(warped_back, warped_back, mask=mask)
             im_out = cv2.add(frame_masked, warped_back_masked)
 
-        cv2.imshow('Frame', im_out)
+            cv2.imshow('Frame', im_out)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

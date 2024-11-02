@@ -41,40 +41,7 @@ def FindBoard(projectBack=False):
             #warped_frame = cv2.flip(warped_frame, 1)
             #cv2.destroyAllWindows()
             #cv2.imshow("Board", warped_frame)
-            if projectBack:
-                warped_frame = DrawArrow(warped_frame, (0, 0), (7, 7))
-                # Recompute the inverse homography to map back to the original frame
-                h_inv, _ = cv2.findHomography(pts_dst, pts_src)
-
-                # Warp the processed board back into the original frame space
-                warped_back = cv2.warpPerspective(warped_frame, h_inv, (frame.shape[1], frame.shape[0]))
-
-                # Ensure pts_src is ordered as a closed quadrilateral in clockwise or counterclockwise order
-                ordered_pts_src = np.array([
-                    pts_src[0],  # Top-left
-                    pts_src[1],  # Top-right
-                    pts_src[3],  # Bottom-right
-                    pts_src[2]   # Bottom-left
-                ], dtype=np.int32)
-
-                # Create a mask for the warped region to blend it into the original frame
-                mask = np.zeros((frame.shape[0], frame.shape[1]), dtype=np.uint8)
-                
-                # Fill the mask with the quadrilateral defined by ordered_pts_src
-                cv2.fillPoly(mask, [ordered_pts_src], 255)
-
-                # Erode the mask to avoid boundary artifacts
-                element = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-                mask = cv2.erode(mask, element, iterations=3)
-
-                # Combine the warped image back into the original frame using the mask
-                frame_masked = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
-                warped_back_masked = cv2.bitwise_and(warped_back, warped_back, mask=mask)
-                im_out = cv2.add(frame_masked, warped_back_masked)
-
-                cv2.imshow('Frame', im_out)
-            else:
-                return warped_frame
+            return (warped_frame, (frame, warped_frame, pts_dst, pts_src))
             
 
         else:
@@ -84,6 +51,69 @@ def FindBoard(projectBack=False):
             break
 
     cap.release()
+
+def ProjectBack(img_data, startSquare, endSquare):
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Failed to capture frame")
+            break
+        
+        parameters =  aruco.DetectorParameters()
+        corners, ids, rejectedImgPoints = detector.detectMarkers(frame)
+        dist_coeffs = np.zeros((4, 1))
+        frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+        if len(corners) == 4:
+            id_corner_pairs = list(zip(ids.flatten(), corners))
+
+            id_corner_pairs.sort(key=lambda x: x[0])
+            sorted_corners = [corner for _, corner in id_corner_pairs]
+            pts_src = np.array([corner[0][0] for corner in sorted_corners], dtype="float32")
+
+            side_length = 300 
+            pts_dst = np.array([
+                [0, 0],
+                [side_length - 1, 0],
+                [0, side_length - 1],
+                [side_length - 1, side_length - 1],
+            ], dtype="float32")
+
+            h, _ = cv2.findHomography(pts_src, pts_dst)
+
+            warped_frame = cv2.warpPerspective(frame, h, (side_length, side_length))
+
+            warped_frame = DrawArrow(warped_frame, startSquare, endSquare)
+            h_inv, _ = cv2.findHomography(pts_dst, pts_src)
+
+            warped_back = cv2.warpPerspective(warped_frame, h_inv, (frame.shape[1], frame.shape[0]))
+
+            # Ensure pts_src is ordered as a closed quadrilateral in clockwise or counterclockwise order
+            ordered_pts_src = np.array([
+                pts_src[0],  # Top-left
+                pts_src[1],  # Top-right
+                pts_src[3],  # Bottom-right
+                pts_src[2]   # Bottom-left
+            ], dtype=np.int32)
+
+            # Create a mask for the warped region to blend it into the original frame
+            mask = np.zeros((frame.shape[0], frame.shape[1]), dtype=np.uint8)
+            
+            # Fill the mask with the quadrilateral defined by ordered_pts_src
+            cv2.fillPoly(mask, [ordered_pts_src], 255)
+
+            # Erode the mask to avoid boundary artifacts
+            element = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            mask = cv2.erode(mask, element, iterations=3)
+
+            # Combine the warped image back into the original frame using the mask
+            frame_masked = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
+            warped_back_masked = cv2.bitwise_and(warped_back, warped_back, mask=mask)
+            im_out = cv2.add(frame_masked, warped_back_masked)
+
+        cv2.imshow('Frame', im_out)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
 def CropBoard(img, padding):
     croppedImg = img.crop((
@@ -114,11 +144,11 @@ def DrawArrow(img, startSquare, endSquare):
 
     arrowColour = (0, 255, 0)
     arrowWidth = 3
-    imgWithArrow = cv2.arrowedLine(img, (xs,ys), (xe, ye), arrowColour, arrowWidth)
+    imgWithArrow = cv2.arrowedLine(img, (ys,xs), (ye, xe), arrowColour, arrowWidth)
     return imgWithArrow
 
 def GetSquares():
-    board = FindBoard(projectBack=False)
+    board, img_data = FindBoard()
 
     grid_size = 8
     width, height, _ = board.shape
@@ -137,14 +167,14 @@ def GetSquares():
             
             # Crop the square and add it to the list
             square = board[top:bottom, left:right]
-            squares[7-row].append(square)
+            squares[row].append(square)
         
     # for row in squares:
     #     for square in row:
     #         cv2.imshow("Square", square)
     #         ClassifySquare(square)
     #         cv2.waitKey(0)
-    return squares
+    return (squares, img_data)
 
 def ClassifySquare(img):
     rgbImg = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -154,17 +184,18 @@ def ClassifySquare(img):
 
 if __name__ == "__main__":
     seed = 139
-    for row in GetSquares():
-        for square in row:
-            if seed % 2 == 0:
-                subfolder = "Red"
-            else:
-                subfolder = "Blue"
-            ToPIL(square).save(f"Training Data/{subfolder}/{seed}.png")
-            seed += 1
-        seed += 1
-        if seed > 139+32:
-            break
+    GetSquares()
+    # for row in GetSquares():
+    #     for square in row:
+    #         if seed % 2 == 0:
+    #             subfolder = "Red"
+    #         else:
+    #             subfolder = "Blue"
+    #         #ToPIL(square).save(f"Training Data/{subfolder}/{seed}.png")
+    #         seed += 1
+    #     seed += 1
+    #     if seed > 139+32:
+    #         break
 # # board = None
 # # while board == None:
 # #     board = FindBoard()

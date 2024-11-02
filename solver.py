@@ -60,14 +60,14 @@ class CheckersSolver:
     def __init__(self, board: list[list[Square]]):
         self.board = board
 
-    def calculate_move(self):
+    def calculate_move(self) -> None | tuple[tuple[int, int],tuple[int, int]]:
         current_state = _Node(deepcopy(self.board))
 
         first_moves = current_state.get_children(True)
         print(first_moves)
         if len(first_moves) == 0:
             print("No more moves")
-            exit()
+            return None
 
         dict = {}
         for i in range(len(first_moves)):
@@ -77,7 +77,7 @@ class CheckersSolver:
 
         if len(dict.keys()) == 0:
             print("Computer has cornered itself")
-            exit()
+            return None
 
         print(dict)
 

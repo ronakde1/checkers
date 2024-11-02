@@ -114,39 +114,69 @@ def DrawArrow(img, startSquare, endSquare):
     imgWithArrow = cv2.arrowedLine(img, (xs,ys), (xe, ye), arrowColour, arrowWidth)
     return imgWithArrow
 
-# board = None
-# while board == None:
-#     board = FindBoard()
-board = FindBoard(projectBack=False)
+def GetSquares():
+    board = FindBoard(projectBack=False)
 
+    grid_size = 8
+    width, height, _ = board.shape
+    square_width = width // grid_size
+    square_height = height // grid_size
 
-while True:
-    cv2.imshow("square", board)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-#board.show()
-
-grid_size = 8
-width, height, _ = board.shape
-square_width = width // grid_size
-square_height = height // grid_size
-
-squares = []
-# Loop through each square position
-for row in range(grid_size):
-    for col in range(grid_size):
-        # Calculate the coordinates of the current square
-        left = col * square_width
-        top = row * square_height
-        right = left + square_width
-        bottom = top + square_height
+    squares = [[] for _ in range(8)]
+    # Loop through each square position
+    for row in range(grid_size):
+        for col in range(grid_size):
+            # Calculate the coordinates of the current square
+            left = col * square_width
+            top = row * square_height
+            right = left + square_width
+            bottom = top + square_height
+            
+            # Crop the square and add it to the list
+            square = board[top:bottom, left:right]
+            squares[7-row].append(square)
         
-        # Crop the square and add it to the list
-        square = board[top:bottom, left:right]
-        squares.append(square)
+    for row in squares:
+        for square in row:
+            cv2.imshow("Square", square)
+            cv2.waitKey(0)
+    return squares
+
+
+GetSquares()
+# # board = None
+# # while board == None:
+# #     board = FindBoard()
+# board = FindBoard(projectBack=False)
+
+
+# # while True:
+# #     cv2.imshow("square", board)
+# #     if cv2.waitKey(1) & 0xFF == ord('q'):
+# #         break
+# #board.show()
+
+# grid_size = 8
+# width, height, _ = board.shape
+# square_width = width // grid_size
+# square_height = height // grid_size
+
+# squares = []
+# # Loop through each square position
+# for row in range(grid_size):
+#     for col in range(grid_size):
+#         # Calculate the coordinates of the current square
+#         left = col * square_width
+#         top = row * square_height
+#         right = left + square_width
+#         bottom = top + square_height
+        
+#         # Crop the square and add it to the list
+#         square = board[top:bottom, left:right]
+#         squares.append(square)
     
-iterable = iter(squares)
-while True:
-    cv2.imshow("sqaure", next(iterable))
-    cv2.waitKey(0)
+# iterable = iter(squares)
+# while True:
+#     cv2.imshow("sqaure", next(iterable))
+#     cv2.waitKey(0)
 

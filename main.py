@@ -1,9 +1,10 @@
 import solver
 import opencvrun2
+import ArucoDetector
 
 
 def main():
-    images = [[]]
+    images = ArucoDetector.GetSquares()
     board = [[opencvrun2.classify(image) for image in row] for row in images]
     move = solver.CheckersSolver(board).calculate_move()
 

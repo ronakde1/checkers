@@ -143,7 +143,6 @@ def GetSquares():
     return squares
 
 
-GetSquares()
 # # board = None
 # # while board == None:
 # #     board = FindBoard()

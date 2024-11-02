@@ -9,7 +9,8 @@ class Piece:
     _is_ai: bool
 
     def __repr__(self):
-        return f"{"c" if self._is_ai else "p"}"
+        val = "c" if self._is_ai else "p"
+        return f"{val}"
 
     def __copy__(self):
         copy_object = Piece(_is_king=self._is_king, _is_ai=self._is_ai)
@@ -41,7 +42,8 @@ class Square:
 
     def __repr__(self):
         if self.is_actual_piece():
-            return f"{"c" if self.is_ai() else "p"}"
+            val = "c" if self.is_ai() else "p"
+            return f"{val}"
         else:
             return "-"
 

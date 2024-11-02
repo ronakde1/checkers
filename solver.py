@@ -9,7 +9,7 @@ class Piece:
     _is_ai: bool
 
     def __repr__(self):
-        return f"{"c" if self.is_ai else "b"}"
+        return f"{"c" if self.is_ai else "p"}"
 
     def __copy__(self):
         copy_object = Piece(_is_king=self._is_king, _is_ai=self.is_ai)
@@ -37,25 +37,13 @@ class Square:
     def is_not_ai(self):
         return (self.piece is not None) and (not self.piece._is_ai)
 
-    def match_text_thing(self, s):
-        if s == "b":
-            return (not self.is_king()) and (not self.is_ai()) and self.is_actual_piece()
-        elif s == "B":
-            return self.is_king() and (not self.is_ai()) and self.is_actual_piece()
-        elif s == "c":
-            return (not self.is_king()) and (self.is_ai()) and self.is_actual_piece()
-        elif s == "C":
-            return self.is_king() and (self.is_ai()) and self.is_actual_piece()
-        else:
-            raise ValueError()
-
 
     def is_actual_piece(self):
         return self.piece is not None
 
     def __repr__(self):
         if self.is_actual_piece():
-            return f"{"c" if self.is_ai() else "b"}"
+            return f"{"c" if self.is_ai() else "p"}"
         else:
             return "-"
 

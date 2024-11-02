@@ -28,7 +28,7 @@ def predict_image_from_path(image_path):
     return classify(image)
 
 
-def classify(image):
+def classify(image) -> Square:
     # Resize and normalize the image
     image_resized = cv2.resize(image, (64, 64)).astype('float32') / 255.0
     image_flat = image_resized.flatten().reshape(1, -1)  # Flatten the image
